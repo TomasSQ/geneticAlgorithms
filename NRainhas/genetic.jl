@@ -1,3 +1,14 @@
+type GASolver
+    emptyPopulation
+    newIndividual
+    fitness
+    mutateRate
+    reproduceRate
+    population
+    ranking
+    solution
+end
+
 function generateFirstPopulation(emptyPopulation, newIndividual)
     population = emptyPopulation()
     for i = 1:size(population, 1)
