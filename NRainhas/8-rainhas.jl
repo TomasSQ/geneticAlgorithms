@@ -35,8 +35,8 @@ function imprimeSolucao(solucao)
     println("")
 end
 
-solucao = solve(POPULATION_SIZE, () -> zeros(Int8, POPULATION_SIZE, PROBLEMAN_SIZE), () -> shuffle(collect(1:PROBLEMAN_SIZE)))
+solved = solve(POPULATION_SIZE, () -> zeros(Int8, POPULATION_SIZE, PROBLEMAN_SIZE), () -> shuffle(collect(1:PROBLEMAN_SIZE)))
 println("Solução")
-println(solucao)
-imprimeSolucao(solucao)
-println(ehViavel(solucao))
+println(solved.solution)
+imprimeSolucao(solved.solution)
+println(ehViavel(solved.solution))

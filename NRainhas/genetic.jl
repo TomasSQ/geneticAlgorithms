@@ -9,6 +9,8 @@ type GASolver
     solution
 end
 
+solver = "UNDEFINED"
+
 function generateFirstPopulation(emptyPopulation, newIndividual)
     population = emptyPopulation()
     for i = 1:size(population, 1)
@@ -97,23 +99,25 @@ function fitness(solucao)
 end
 
 function solve(populationSize, emptyPopulation, newIndividual)
+    solver = GASolver(emptyPopulation, newIndividual, fitness, 0.8, 0.2, [], [], [])
     generation = 0
-    population = generateFirstPopulation(emptyPopulation, newIndividual)
-    ranking = zeros(Int32, size(population, 1), 2)
+    solver.population = generateFirstPopulation(emptyPopulation, newIndividual)
+    solver.ranking = zeros(Int32, size(solver.population, 1), 2)
 
     while generation != 1000000
         generation += 1
-        ranking = rank(population)
+        solver.ranking = rank(solver.population)
 
-        if foundSolution(ranking)
-            println("Geração: ", generation, " ", ranking[1, 1], " ", mean(ranking[:, 1]))
+        if foundSolution(solver.ranking)
+            println("Geração: ", generation, " ", solver.ranking[1, 1], " ", mean(solver.ranking[:, 1]))
             break
         end
         if generation % 10 == 0
-            println("Geração: ", generation, " ", ranking[1, 1], " ", mean(ranking[:, 1]))
+            println("Geração: ", generation, " ", solver.ranking[1, 1], " ", mean(solver.ranking[:, 1]))
         end
-        population = generateNewPopulation(emptyPopulation, population, ranking)
+        solver.population = generateNewPopulation(solver.emptyPopulation, solver.population, solver.ranking)
     end
 
-    return solucao = population[ranking[1, 2], :]
+    solver.solution = solver.population[solver.ranking[1, 2], :]
+    return solver
 end
