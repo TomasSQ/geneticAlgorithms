@@ -2,11 +2,11 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const WORLD_SIZE = 100
+const WORLD_SIZE = 1000
 const CITIES = 20
 const PROBLEMAN_SIZE = CITIES::Int64
-const POPULATION_SIZE = 100::Int64
-const MAX_GENERATION = 10000::Int64
+const POPULATION_SIZE = 1000::Int64
+const MAX_GENERATION = 1000000::Int64
 
 type City
     lat::Float64
@@ -53,8 +53,19 @@ function newIndividual()
     return shuffle(collect(1:PROBLEMAN_SIZE))
 end
 
-function shouldStop(metrics)
-    return metrics[1] < 1
+metrics = []
+
+function shouldStop(m)
+    if length(metrics) != 1000
+        push!(metrics, m[1])
+    else
+        metrics[indmax(metrics)] = m[1]
+        println(mean(metrics), "   ", m[1])
+        if round(Int, mean(metrics)) == round(Int, m[1])
+            return true
+        end
+    end
+    return false
 end
 
 solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION, false)
