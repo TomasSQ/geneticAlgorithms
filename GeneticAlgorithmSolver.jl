@@ -19,8 +19,9 @@ type GASolver
     ranking::AbstractArray{Ranking}
     solution::AbstractVector{Float64}
     generation::Int64
+    maximization::Bool
 
-    GASolver(populationSize, individualSize, newIndividual, fitness, mutateRate, reproduceRate) = new(
+    GASolver(populationSize, individualSize, newIndividual, fitness, mutateRate, reproduceRate, maximization) = new(
         populationSize,
         individualSize,
         newIndividual,
@@ -30,7 +31,8 @@ type GASolver
         Array{Float64,2}(populationSize, individualSize),
         Array{Ranking}(populationSize),
         Array{Float64}(individualSize),
-        0
+        0,
+        maximization
     )
 end
 
@@ -102,7 +104,7 @@ function rank(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    solver.ranking = sort(solver.ranking, by = x -> -x.fitness)
+    solver.ranking = sort(solver.ranking, by = x -> solver.maximization ? -x.fitness : x.fitness)
 end
 
 function getValues(solver::GASolver)
@@ -125,8 +127,8 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64)
-    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9)
+function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
+    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9, maximization)
     generateFirstPopulation(solver)
 
     while solver.generation != maxGeneration

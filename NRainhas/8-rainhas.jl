@@ -2,8 +2,8 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const PROBLEMAN_SIZE = 15::Int64
-const POPULATION_SIZE = 200::Int64
+const PROBLEMAN_SIZE = 8::Int64
+const POPULATION_SIZE = 5::Int64
 const MAX_GENERATION = 10000::Int64
 const PROBLEMAN_SOLUTION = (PROBLEMAN_SIZE ^ 2 - PROBLEMAN_SIZE) / 2
 
@@ -63,7 +63,7 @@ function shouldStop(metrics)
     return metrics[2] == PROBLEMAN_SOLUTION
 end
 
-solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION)
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION, true)
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])
