@@ -63,13 +63,10 @@ end
 
 function tournament(solver::GASolver)
     values = getValues(solver)
-    max = maximum(values)
-    fit = -1.0 * values + max
-
-    randValue = rand() * sum(fit)::Float64
+    randValue = rand() * sum(values)::Float64
     sumFitness = 0.0
     for i = 1:solver.populationSize
-        sumFitness += fit[i]
+        sumFitness += values[i]
 
         if randValue <= sumFitness
             return solver.population[i, :]
@@ -105,7 +102,7 @@ function rank(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    solver.ranking = sort(solver.ranking, by = x -> x.fitness)
+    solver.ranking = sort(solver.ranking, by = x -> -x.fitness)
 end
 
 function getValues(solver::GASolver)
@@ -138,12 +135,12 @@ function solve(populationSize::Int64, individualSize::Int64, newIndividual::Func
         m = metrics(solver)
         if shouldStop(metrics(solver))
             if DEBUG
-                println("Geração: ", solver.generation, " ", m[1])
+                println("Geração: ", solver.generation, " ", m[1], " ", m[2], " ", m[3])
             end
             break
         end
         if solver.generation % 10 == 0 && DEBUG
-            println("Geração: ", solver.generation, " ", m[1])
+            println("Geração: ", solver.generation, " ", m[1], " ", m[2], " ", m[3])
         end
         solver.population = generateNewPopulation(solver)
     end

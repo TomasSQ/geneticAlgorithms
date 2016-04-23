@@ -2,13 +2,10 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const PROBLEMAN_SIZE = 8::Int64
-const POPULATION_SIZE = 10::Int64
+const PROBLEMAN_SIZE = 15::Int64
+const POPULATION_SIZE = 200::Int64
 const MAX_GENERATION = 10000::Int64
-
-function ehViavel(solucao)
-    return fitness(solucao) == 0
-end
+const PROBLEMAN_SOLUTION = (PROBLEMAN_SIZE ^ 2 - PROBLEMAN_SIZE) / 2
 
 function imprimeLinha(solucao)
     print("+")
@@ -38,6 +35,10 @@ function imprimeSolucao(solucao)
     println("")
 end
 
+function ehViavel(solucao)
+    return fitness(solucao) == PROBLEMAN_SOLUTION
+end
+
 function fitness(solucao)
     distancia = 0
 
@@ -51,15 +52,20 @@ function fitness(solucao)
         end
     end
 
-    return distancia
+    return PROBLEMAN_SOLUTION - distancia
 end
 
 function newIndividual()
     return shuffle(collect(1:PROBLEMAN_SIZE))
 end
 
-solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, (metrics) -> metrics[1] == 0, MAX_GENERATION)
+function shouldStop(metrics)
+    return metrics[2] == PROBLEMAN_SOLUTION
+end
+
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION)
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])
+println(fitness(solved[1]))
 println(ehViavel(solved[1]))
