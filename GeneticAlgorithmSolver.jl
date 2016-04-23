@@ -36,7 +36,7 @@ type GASolver
     )
 end
 
-function generateFirstPopulation(solver::GASolver)
+function generateFirstPopulation!(solver::GASolver)
     for i = 1:solver.populationSize
         solver.population[i, :] = solver.newIndividual()
     end
@@ -44,7 +44,7 @@ function generateFirstPopulation(solver::GASolver)
     solver.population
 end
 
-function generateNewPopulation(solver::GASolver)
+function generateNewPopulation!(solver::GASolver)
     population = Array{Float64}(solver.populationSize, solver.individualSize)
 
     population[1, :] = solver.population[solver.ranking[1].index, :]
@@ -99,7 +99,7 @@ function mutate(a::AbstractArray, mutateRate)
     return a
 end
 
-function rank(solver::GASolver)
+function rank!(solver::GASolver)
     for i = 1:solver.populationSize
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
@@ -129,11 +129,11 @@ end
 
 function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
     solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9, maximization)
-    generateFirstPopulation(solver)
+    generateFirstPopulation!(solver)
 
     while solver.generation != maxGeneration
         solver.generation += 1
-        solver.ranking = rank(solver)
+        rank!(solver)
         m = metrics(solver)
         if shouldStop(metrics(solver))
             if DEBUG
@@ -144,7 +144,7 @@ function solve(populationSize::Int64, individualSize::Int64, newIndividual::Func
         if solver.generation % 10 == 0 && DEBUG
             println("Geração: ", solver.generation, " ", m[1], " ", m[2], " ", m[3])
         end
-        solver.population = generateNewPopulation(solver)
+        generateNewPopulation!(solver)
     end
 
     solver.solution = collect(solver.population[solver.ranking[1].index, :])

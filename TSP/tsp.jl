@@ -3,7 +3,7 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 using GeneticAlgorithmSolver: GASolver, solve
 
 const WORLD_SIZE = 100
-const CITIES = 8
+const CITIES = 20
 const PROBLEMAN_SIZE = CITIES::Int64
 const POPULATION_SIZE = 100::Int64
 const MAX_GENERATION = 10000::Int64
@@ -25,8 +25,17 @@ function ehViavel(solucao)
     return fitness(solucao) < 1000
 end
 
+function distance(c1::City, c2::City)
+    d = sqrt((c1.lat - c2.lat) ^ 2 + (c1.long - c2.long) ^ 2)
+    return d == 0 ? Inf : d
+end
+
 function fitness(solucao)
-    distancia = 0
+    d = 0
+
+    if length(intersect(newIndividual(), solucao)) != length(solucao)
+        return Inf
+    end
 
     for i in eachindex(solucao)
         city1 = cities[round(Int, solucao[i])]
@@ -34,10 +43,10 @@ function fitness(solucao)
         if i < length(solucao)
             city2 = cities[round(Int, solucao[i + 1])]
         end
-        distancia += sqrt((city1.lat - city2.lat) ^ 2 + (city1.long - city2.long) ^ 2)
+        d += distance(city1, city2)
     end
 
-    return distancia
+    return d
 end
 
 function newIndividual()
