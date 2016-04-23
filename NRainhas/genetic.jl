@@ -7,7 +7,8 @@ type Ranking
 end
 
 type GASolver
-    emptyPopulation::Function
+    populationSize::Int32
+    individualSize::Int32
     newIndividual::Function
     fitness::Function
     mutateRate::Float64
@@ -16,24 +17,21 @@ type GASolver
     ranking::AbstractArray{Ranking}
     solution::AbstractVector{Float64}
 
-    GASolver(emptyPopulation, newIndividual, fitness, mutateRate, reproduceRate) = (
-        solver = new();
-        solver.emptyPopulation = emptyPopulation;
-        solver.newIndividual = newIndividual;
-        solver.fitness = fitness;
-        solver.mutateRate = mutateRate;
-        solver.reproduceRate = reproduceRate;
-        solver.population = emptyPopulation();
-        solver.ranking = Array{Ranking}(size(solver.population, 1));
-        solver.solution = zeros(Float64, size(solver.population, 1));
-        solver
+    GASolver(populationSize, individualSize, newIndividual, fitness, mutateRate, reproduceRate) = new(
+        populationSize,
+        individualSize,
+        newIndividual,
+        fitness,
+        mutateRate,
+        reproduceRate,
+        Array{Float64,2}(populationSize, individualSize),
+        Array{Ranking}(populationSize),
+        Array{Float64}(individualSize)
     )
 end
 
-solver = "UNDEFINED"
-
 function generateFirstPopulation(solver::GASolver)
-    for i = 1:size(solver.population, 1)
+    for i = 1:solver.populationSize
         solver.population[i, :] = solver.newIndividual()
     end
 
@@ -41,8 +39,9 @@ function generateFirstPopulation(solver::GASolver)
 end
 
 function generateNewPopulation(solver::GASolver)
-    population = solver.emptyPopulation()
-    for i = 1:size(solver.ranking, 1)
+    population = solver.population
+
+    for i = 1:solver.populationSize
         if i % 2 == 0
             continue
         end
@@ -51,7 +50,7 @@ function generateNewPopulation(solver::GASolver)
         secondIndividual = solver.ranking[i + 1].index
 
         if rand() > solver.reproduceRate
-            newIndividuals = reproduce(solver.population[firstIndividual, :], solver.population[secondIndividual, :])
+            newIndividuals = reproduce(solver.population[firstIndividual, :], solver.population[secondIndividual, :], solver.mutateRate)
             population[firstIndividual, :] = newIndividuals[1]
             population[secondIndividual, :] = newIndividuals[2]
         else
@@ -63,21 +62,21 @@ function generateNewPopulation(solver::GASolver)
     solver.population = population
 end
 
-function randomIndex(a)
+function randomIndex(a::AbstractArray)
     return round(Int, rand() * (length(a) - 1) + 1)
 end
 
-function reproduce(a, b)
+function reproduce(a::AbstractArray, b::AbstractArray, mutateRate::Float64)
     point = randomIndex(a)
-    return mutate([sub(a, 1:point); sub(b, (point + 1):length(b))], [sub(b, 1:point); sub(a, (point + 1):length(a))])
+    return mutate([sub(a, 1:point); sub(b, (point + 1):length(b))], [sub(b, 1:point); sub(a, (point + 1):length(a))], mutateRate)
 end
 
-function mutate(a, b)
-    return (mutate(a), mutate(b))
+function mutate(a::AbstractArray, b::AbstractArray, mutateRate::Float64)
+    return (mutate(a, mutateRate), mutate(b, mutateRate))
 end
 
-function mutate(a)
-    if rand() > 0.80
+function mutate(a::AbstractArray, mutateRate)
+    if rand() > mutateRate
         point1 = randomIndex(a)
         point2 = randomIndex(a)
         aux = a[point1]
@@ -89,9 +88,7 @@ function mutate(a)
 end
 
 function rank(solver::GASolver)
-    populationSize = size(solver.population, 1)
-
-    for i in 1:populationSize
+    for i = 1:solver.populationSize
         solver.ranking[i] = Ranking(fitness(solver.population[i, :]), i)
     end
 
@@ -112,8 +109,8 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize, emptyPopulation, newIndividual, fitness, shouldStop)
-    solver = GASolver(emptyPopulation, newIndividual, fitness, 0.8, 0.2)
+function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function)
+    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.8, 0.2)
     generation = 0
     generateFirstPopulation(solver)
 
