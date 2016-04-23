@@ -1,45 +1,66 @@
+#module GeneticAlgorithmSolver
+#export GASolver, solve
+
+type Ranking
+    fitness::Float64
+    index::Int32
+end
+
 type GASolver
-    emptyPopulation
-    newIndividual
-    fitness
-    mutateRate
-    reproduceRate
-    population
-    ranking
-    solution
+    emptyPopulation::Function
+    newIndividual::Function
+    fitness::Function
+    mutateRate::Float64
+    reproduceRate::Float64
+    population::AbstractArray{Float64,2}
+    ranking::AbstractArray{Ranking}
+    solution::AbstractVector{Float64}
+
+    GASolver(emptyPopulation, newIndividual, fitness, mutateRate, reproduceRate) = (
+        solver = new();
+        solver.emptyPopulation = emptyPopulation;
+        solver.newIndividual = newIndividual;
+        solver.fitness = fitness;
+        solver.mutateRate = mutateRate;
+        solver.reproduceRate = reproduceRate;
+        solver.population = emptyPopulation();
+        solver.ranking = Array{Ranking}(size(solver.population, 1));
+        solver.solution = zeros(Float64, size(solver.population, 1));
+        solver
+    )
 end
 
 solver = "UNDEFINED"
 
-function generateFirstPopulation(emptyPopulation, newIndividual)
-    population = emptyPopulation()
-    for i = 1:size(population, 1)
-        population[i, :] = newIndividual()
+function generateFirstPopulation(solver::GASolver)
+    for i = 1:size(solver.population, 1)
+        solver.population[i, :] = solver.newIndividual()
     end
 
-    return population
+    solver.population
 end
 
-function generateNewPopulation(emptyPopulation, oldPopulation, ranking)
-    population = emptyPopulation()
-    for i = 1:size(ranking, 1)
+function generateNewPopulation(solver::GASolver)
+    population = solver.emptyPopulation()
+    for i = 1:size(solver.ranking, 1)
         if i % 2 == 0
             continue
         end
-        firstIndividual = ranking[i, 2]
-        secondIndividual = ranking[i + 1, 2]
 
-        if rand() > 0.15
-            newIndividuals = reproduce(oldPopulation[firstIndividual, :], oldPopulation[secondIndividual, :])
+        firstIndividual = solver.ranking[i].index
+        secondIndividual = solver.ranking[i + 1].index
+
+        if rand() > solver.reproduceRate
+            newIndividuals = reproduce(solver.population[firstIndividual, :], solver.population[secondIndividual, :])
             population[firstIndividual, :] = newIndividuals[1]
             population[secondIndividual, :] = newIndividuals[2]
         else
-            population[firstIndividual, :] = shuffle(collect(1:size(oldPopulation, 2)))
-            population[secondIndividual, :] = shuffle(collect(1:size(oldPopulation, 2)))
+            population[firstIndividual, :] = shuffle(collect(1:size(solver.population, 2)))
+            population[secondIndividual, :] = shuffle(collect(1:size(solver.population, 2)))
         end
     end
 
-    return population
+    solver.population = population
 end
 
 function randomIndex(a)
@@ -67,57 +88,52 @@ function mutate(a)
     return a
 end
 
-function rank(population)
-    populationSize = size(population, 1)
-    ranking = zeros(Int32, populationSize, 2)
+function rank(solver::GASolver)
+    populationSize = size(solver.population, 1)
 
     for i in 1:populationSize
-        ranking[i, :] = [fitness(population[i, :]), i]
+        solver.ranking[i] = Ranking(fitness(solver.population[i, :]), i)
     end
 
-    return sortrows(ranking)
+    solver.ranking = sort(solver.ranking, by = x -> x.fitness)
 end
 
-function foundSolution(ranking)
-    return ranking[1, 1] == 0
-end
-
-function fitness(solucao)
-    distancia = 0
-
-    for i in eachindex(solucao)
-        for j = (i + 1):length(solucao)
-            if solucao[i] == solucao[j] ||
-                solucao[i] + (j - i) == solucao[j] ||
-                solucao[i] - (j - i) == solucao[j]
-                distancia += 1
-            end
-        end
+function metrics(solver::GASolver)
+    metrics = zeros(Float64, 3)
+    values = Array{Float64}(length(solver.ranking))
+    for i in eachindex(values)
+        values[i] = solver.ranking[i].fitness
     end
 
-    return distancia
+    metrics[1] = minimum(values)
+    metrics[2] = maximum(values)
+    metrics[3] = mean(values)
+
+    return metrics
 end
 
-function solve(populationSize, emptyPopulation, newIndividual)
-    solver = GASolver(emptyPopulation, newIndividual, fitness, 0.8, 0.2, [], [], [])
+function solve(populationSize, emptyPopulation, newIndividual, fitness, shouldStop)
+    solver = GASolver(emptyPopulation, newIndividual, fitness, 0.8, 0.2)
     generation = 0
-    solver.population = generateFirstPopulation(emptyPopulation, newIndividual)
-    solver.ranking = zeros(Int32, size(solver.population, 1), 2)
+    generateFirstPopulation(solver)
 
     while generation != 1000000
         generation += 1
-        solver.ranking = rank(solver.population)
+        solver.ranking = rank(solver)
 
-        if foundSolution(solver.ranking)
-            println("Geração: ", generation, " ", solver.ranking[1, 1], " ", mean(solver.ranking[:, 1]))
+        if shouldStop(metrics(solver))
+            println("Geração: ", generation, " ", solver.ranking[1].fitness)
             break
         end
         if generation % 10 == 0
-            println("Geração: ", generation, " ", solver.ranking[1, 1], " ", mean(solver.ranking[:, 1]))
+            println("Geração: ", generation, " ", solver.ranking[1].fitness)
         end
-        solver.population = generateNewPopulation(solver.emptyPopulation, solver.population, solver.ranking)
+        solver.population = generateNewPopulation(solver)
     end
 
-    solver.solution = solver.population[solver.ranking[1, 2], :]
-    return solver
+    solver.solution = collect(solver.population[solver.ranking[1].index, :])
+
+    return solver.solution
 end
+
+#end
