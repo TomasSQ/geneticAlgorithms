@@ -1,5 +1,5 @@
-#module GeneticAlgorithmSolver
-#export GASolver, solve
+module GeneticAlgorithmSolver
+export solve
 
 const DEBUG = true
 
@@ -102,7 +102,7 @@ end
 
 function rank(solver::GASolver)
     for i = 1:solver.populationSize
-        solver.ranking[i] = Ranking(fitness(solver.population[i, :]), i)
+        solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
     solver.ranking = sort(solver.ranking, by = x -> x.fitness)
@@ -128,11 +128,11 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function)
+function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64)
     solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9)
     generateFirstPopulation(solver)
 
-    while solver.generation != 1000000
+    while solver.generation != maxGeneration
         solver.generation += 1
         solver.ranking = rank(solver)
         m = metrics(solver)
@@ -153,4 +153,4 @@ function solve(populationSize::Int64, individualSize::Int64, newIndividual::Func
     return (solver.solution, solver.generation)
 end
 
-#end
+end

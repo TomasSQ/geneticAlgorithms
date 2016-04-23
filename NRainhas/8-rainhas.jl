@@ -1,8 +1,10 @@
-#using GeneticAlgorithmSolver: GASolver, solve
-include("genetic.jl")
+push!(LOAD_PATH, string(pwd(), "/.."))
 
-const PROBLEMAN_SIZE = 15::Int64
-const POPULATION_SIZE = 500::Int64
+using GeneticAlgorithmSolver: GASolver, solve
+
+const PROBLEMAN_SIZE = 8::Int64
+const POPULATION_SIZE = 10::Int64
+const MAX_GENERATION = 10000::Int64
 
 function ehViavel(solucao)
     return fitness(solucao) == 0
@@ -56,7 +58,7 @@ function newIndividual()
     return shuffle(collect(1:PROBLEMAN_SIZE))
 end
 
-solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, (metrics) -> metrics[1] == 0)
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, (metrics) -> metrics[1] == 0, MAX_GENERATION)
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])
