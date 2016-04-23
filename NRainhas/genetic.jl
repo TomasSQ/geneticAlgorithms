@@ -1,7 +1,7 @@
 #module GeneticAlgorithmSolver
 #export GASolver, solve
 
-const DEBUG = false
+const DEBUG = true
 
 type Ranking
     fitness::Float64
@@ -88,11 +88,13 @@ end
 
 function mutate(a::AbstractArray, mutateRate)
     if rand() > mutateRate
-        point1 = randomIndex(a)
-        point2 = randomIndex(a)
-        aux = a[point1]
-        a[point1] = a[point2]
-        a[point2] = aux
+        for i = 1:randomIndex(a)
+            point1 = randomIndex(a)
+            point2 = randomIndex(a)
+            aux = a[point1]
+            a[point1] = a[point2]
+            a[point2] = aux
+        end
     end
 
     return a
@@ -127,7 +129,7 @@ function metrics(solver::GASolver)
 end
 
 function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function)
-    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.8, 0.2)
+    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9)
     generateFirstPopulation(solver)
 
     while solver.generation != 1000000

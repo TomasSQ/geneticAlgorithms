@@ -2,7 +2,7 @@
 include("genetic.jl")
 
 const PROBLEMAN_SIZE = 15::Int64
-const POPULATION_SIZE = 200::Int64
+const POPULATION_SIZE = 500::Int64
 
 function ehViavel(solucao)
     return fitness(solucao) == 0
