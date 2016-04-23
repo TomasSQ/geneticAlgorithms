@@ -1,6 +1,8 @@
 #module GeneticAlgorithmSolver
 #export GASolver, solve
 
+const DEBUG = false
+
 type Ranking
     fitness::Float64
     index::Int32
@@ -46,17 +48,33 @@ function generateNewPopulation(solver::GASolver)
     population[1, :] = solver.population[solver.ranking[1].index, :]
 
     for i = 2:solver.populationSize
-        firstIndividual = solver.ranking[i - 1].index
-        secondIndividual = solver.ranking[i].index
-
         if rand() > solver.reproduceRate
-            population[i, :] = crossover(solver.population[firstIndividual, :], solver.population[secondIndividual, :], solver.mutateRate)
+            firstIndividual = tournament(solver)
+            secondIndividual = tournament(solver)
+
+            population[i, :] = crossover(firstIndividual, secondIndividual, solver.mutateRate)
         else
             population[i, :] = solver.newIndividual()
         end
     end
 
     solver.population = population
+end
+
+function tournament(solver::GASolver)
+    values = getValues(solver)
+    max = maximum(values)
+    fit = -1.0 * values + max
+
+    randValue = rand() * sum(fit)::Float64
+    sumFitness = 0.0
+    for i = 1:solver.populationSize
+        sumFitness += fit[i]
+
+        if randValue <= sumFitness
+            return solver.population[i, :]
+        end
+    end
 end
 
 function randomIndex(a::AbstractArray)
@@ -110,26 +128,27 @@ end
 
 function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function)
     solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.8, 0.2)
-    generation = 0
     generateFirstPopulation(solver)
 
-    while generation != 1000000
-        generation += 1
+    while solver.generation != 1000000
+        solver.generation += 1
         solver.ranking = rank(solver)
         m = metrics(solver)
         if shouldStop(metrics(solver))
-            println("Geração: ", generation, " ", m[1])
+            if DEBUG
+                println("Geração: ", solver.generation, " ", m[1])
+            end
             break
         end
-        if generation % 10 == 0
-            println("Geração: ", generation, " ", m[1])
+        if solver.generation % 10 == 0 && DEBUG
+            println("Geração: ", solver.generation, " ", m[1])
         end
         solver.population = generateNewPopulation(solver)
     end
 
     solver.solution = collect(solver.population[solver.ranking[1].index, :])
 
-    return solver.solution
+    return (solver.solution, solver.generation)
 end
 
 #end

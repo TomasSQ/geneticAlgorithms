@@ -1,11 +1,8 @@
-push!(LOAD_PATH, pwd())
-println(LOAD_PATH)
-
 #using GeneticAlgorithmSolver: GASolver, solve
 include("genetic.jl")
 
-const PROBLEMAN_SIZE = 8::Int64
-const POPULATION_SIZE = 10::Int64
+const PROBLEMAN_SIZE = 15::Int64
+const POPULATION_SIZE = 200::Int64
 
 function ehViavel(solucao)
     return fitness(solucao) == 0
@@ -59,8 +56,8 @@ function newIndividual()
     return shuffle(collect(1:PROBLEMAN_SIZE))
 end
 
-solution = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, (metrics) -> metrics[1] == 0)
-println("Solução")
-println(solution)
-imprimeSolucao(solution)
-println(ehViavel(solution))
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, (metrics) -> metrics[1] == 0)
+println("Solução encontrada na geração ", solved[2])
+println(solved[1])
+imprimeSolucao(solved[1])
+println(ehViavel(solved[1]))
