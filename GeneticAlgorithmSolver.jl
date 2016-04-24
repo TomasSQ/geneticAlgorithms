@@ -47,7 +47,7 @@ end
 function generateNewPopulation!(solver::GASolver)
     population = Array{Float64}(solver.populationSize, solver.individualSize)
 
-    population[1, :] = solver.population[solver.ranking[1].index, :]
+    population[1, :] = solver.population[getFitnessest(solver).index, :]
 
     for i = 2:solver.populationSize
         if rand() > solver.reproduceRate
@@ -104,7 +104,26 @@ function rank!(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    solver.ranking = sort(solver.ranking, by = x -> solver.maximization ? -x.fitness : x.fitness)
+    solver.ranking
+end
+
+function getFitnessest(solver::GASolver)
+    max = -Inf
+    maxI = 1
+    min = Inf
+    minI = 1
+    for i = 1:solver.populationSize
+        if solver.ranking[i].fitness > max
+            max = solver.ranking[i].fitness
+            maxI = solver.ranking[i].index
+        end
+        if solver.ranking[i].fitness < min
+            min  = solver.ranking[i].fitness
+            minI = solver.ranking[i].index
+        end
+    end
+
+    return solver.maximization ? Ranking(max, maxI) : Ranking(min, minI)
 end
 
 function getValues(solver::GASolver)
@@ -147,7 +166,7 @@ function solve(populationSize::Int64, individualSize::Int64, newIndividual::Func
         generateNewPopulation!(solver)
     end
 
-    solver.solution = collect(solver.population[solver.ranking[1].index, :])
+    solver.solution = collect(solver.population[getFitnessest(solver).index, :])
 
     return (solver.solution, solver.generation)
 end
