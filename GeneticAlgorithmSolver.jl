@@ -12,6 +12,7 @@ type GASolver
     populationSize::Int32
     individualSize::Int32
     newIndividual::Function
+    ajust::Function
     fitness::Function
     mutateRate::Float64
     reproduceRate::Float64
@@ -21,10 +22,11 @@ type GASolver
     generation::Int64
     maximization::Bool
 
-    GASolver(populationSize, individualSize, newIndividual, fitness, mutateRate, reproduceRate, maximization) = new(
+    GASolver(populationSize, individualSize, newIndividual, ajust, fitness, mutateRate, reproduceRate, maximization) = new(
         populationSize,
         individualSize,
         newIndividual,
+        ajust,
         fitness,
         mutateRate,
         reproduceRate,
@@ -54,7 +56,7 @@ function generateNewPopulation!(solver::GASolver)
             firstIndividual = tournament(solver)
             secondIndividual = tournament(solver)
 
-            population[i, :] = crossover(firstIndividual, secondIndividual, solver.mutateRate)
+            population[i, :] = solver.ajust(crossover(firstIndividual, secondIndividual, solver.mutateRate))
         else
             population[i, :] = solver.newIndividual()
         end
@@ -104,14 +106,27 @@ function rank!(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    solver.ranking
+    normalize!(solver)
+end
+
+function normalize!(solver::GASolver)
+    sorted = sort(solver.ranking, by = (x) -> x.fitness, rev=!solver.maximization)
+
+    values = getValues(solver)
+    min = solver.maximization ? minimum(values) : maximum(values)
+    max = solver.maximization ? maximum(values) : minimum(values)
+    factor = (max - min) / (solver.populationSize - 1)
+
+    for i = 1:solver.populationSize
+        solver.ranking[i] = Ranking(min + factor * (i - 1), sorted[i].index)
+    end
 end
 
 function getFitnessest(solver::GASolver)
     max = -Inf
-    maxI = 1
+    maxI = 0
     min = Inf
-    minI = 1
+    minI = 0
     for i = 1:solver.populationSize
         if solver.ranking[i].fitness > max
             max = solver.ranking[i].fitness
@@ -146,8 +161,8 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
-    solver = GASolver(populationSize, individualSize, newIndividual, fitness, 0.2, 0.9, maximization)
+function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, ajust::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
+    solver = GASolver(populationSize, individualSize, newIndividual, ajust, fitness, 0.2, 0.9, maximization)
     generateFirstPopulation!(solver)
 
     while solver.generation != maxGeneration
@@ -156,18 +171,21 @@ function solve(populationSize::Int64, individualSize::Int64, newIndividual::Func
         m = metrics(solver)
         if shouldStop(metrics(solver))
             if DEBUG
-                println("Geração: ", solver.generation, " ", m[1], " ", m[2], " ", m[3])
+                println("Geração: ", solver.generation, " min ", m[1], " max ", m[2], " avg ", m[3])
             end
             break
         end
+
         if solver.generation % 10 == 0 && DEBUG
-            println("Geração: ", solver.generation, " ", m[1], " ", m[2], " ", m[3])
+            println("Geração: ", solver.generation, " min ", m[1], " max ", m[2], " avg ", m[3])
         end
         generateNewPopulation!(solver)
     end
 
+    println(getFitnessest(solver).fitness)
+    println(getFitnessest(solver).index)
+    println(solver.fitness(solver.population[getFitnessest(solver).index, :]))
     solver.solution = collect(solver.population[getFitnessest(solver).index, :])
-
     return (solver.solution, solver.generation)
 end
 
