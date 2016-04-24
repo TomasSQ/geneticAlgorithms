@@ -106,7 +106,7 @@ function rank!(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    normalize!(solver)
+    #normalize!(solver)
 end
 
 function normalize!(solver::GASolver)

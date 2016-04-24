@@ -1,12 +1,16 @@
 push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
+using Plots
 
-const WORLD_SIZE = 10000
+pyplot()
+
+const WORLD_SIZE = 1000
 const CITIES = 20
 const PROBLEMAN_SIZE = CITIES::Int64
-const POPULATION_SIZE = 100::Int64
+const POPULATION_SIZE = 200::Int64
 const MAX_GENERATION = 50000::Int64
+const EQUALS_GENERATIONS = 10000::Int64
 
 type City
     lat::Float64
@@ -19,10 +23,25 @@ for i = 1:CITIES
 end
 
 function imprimeSolucao(solucao)
+    xs = Array{Float64}(length(solucao) + 1)
+    ys = Array{Float64}(length(solucao) + 1)
+    for i = 1:length(solucao)
+        city = cities[round(Int, solucao[i])]
+        ys[i] = city.long
+        xs[i] = city.lat
+    end
+    city = cities[round(Int, solucao[1])]
+    ys[end] = city.long
+    xs[end] = city.lat
+    println(xs)
+    println(ys)
+    plot(xs, ys)
+    scatter!(xs, ys,markersize=6,c=:orange)
+    png("tsp")
 end
 
 function ehViavel(solucao)
-    return fitness(solucao) < 1000
+    return fitness(solucao) < WORLD_SIZE ^ 2
 end
 
 function distance(c1::City, c2::City)
@@ -52,7 +71,7 @@ end
 metrics = []
 
 function shouldStop(m)
-    if length(metrics) != 10000
+    if length(metrics) != EQUALS_GENERATIONS
         push!(metrics, m[1])
     else
         metrics[indmax(metrics)] = m[1]
@@ -88,3 +107,5 @@ println(solved[1])
 imprimeSolucao(solved[1])
 println(fitness(solved[1]))
 println(ehViavel(solved[1]))
+
+#imprimeSolucao([16.0,13.0,20.0,9.0,18.0,3.0,11.0,19.0,8.0,12.0,4.0,6.0,10.0,7.0,5.0,15.0,1.0,14.0,2.0,17.0])
