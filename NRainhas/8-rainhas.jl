@@ -2,9 +2,9 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const PROBLEMAN_SIZE = 15::Int64
-const POPULATION_SIZE = 500::Int64
-const MAX_GENERATION = 10000::Int64
+const PROBLEMAN_SIZE = 15::Int
+const POPULATION_SIZE = 500::Int
+const MAX_GENERATION = 10000::Int
 const PROBLEMAN_SOLUTION = (PROBLEMAN_SIZE ^ 2 - PROBLEMAN_SIZE) / 2
 
 function imprimeLinha(solucao)

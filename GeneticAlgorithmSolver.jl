@@ -19,7 +19,7 @@ type GASolver
     population::AbstractArray{Float64,2}
     ranking::AbstractArray{Ranking}
     solution::AbstractVector{Float64}
-    generation::Int64
+    generation::Int
     maximization::Bool
 
     GASolver(populationSize, individualSize, newIndividual, ajust, fitness, mutateRate, reproduceRate, maximization) = new(
@@ -53,10 +53,11 @@ function generateNewPopulation!(solver::GASolver)
 
     for i = 2:solver.populationSize
         if rand() > solver.reproduceRate
-            firstIndividual = tournament(solver)
-            secondIndividual = tournament(solver)
+            parent1 = tournament(solver)
+            parent2 = tournament(solver)
 
-            population[i, :] = solver.ajust(crossover(firstIndividual, secondIndividual, solver.mutateRate))
+			child = crossover(parent1, parent2, solver.mutateRate)
+            population[i, :] = solver.ajust(child)
         else
             population[i, :] = solver.newIndividual()
         end
@@ -83,18 +84,40 @@ function randomIndex(a::AbstractArray)
 end
 
 function crossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64)
-    point = randomIndex(a)
-    return mutate([sub(a, 1:point); sub(b, (point + 1):length(b))], mutateRate)
+   	point1 = randomIndex(a)
+   	point2 = randomIndex(a)
+    startI = min(point1, point2)
+    endI = max(point1, point2)
+    r = Array{Float64}(length(a))
+    for i = 1:length(a)
+    	if startI <= i && i <= endI
+    		r[i] = a[i]
+    	else
+    		r[i] = 0
+    	end
+    end
+
+    j = 1
+	for i = 1:length(a)
+		if r[i] == 0
+			while findfirst(r, b[j]) != 0
+				j += 1
+			end
+			r[i] = b[j]
+		end
+	end
+
+    return mutate(r, mutateRate)
+    #return mutate([sub(a, 1:point); sub(b, (point + 1):length(b))], mutateRate)
 end
 
 function mutate(a::AbstractArray, mutateRate)
-    if rand() > mutateRate
-        for i = 1:randomIndex(a)
+    for i = 1:length(a)
+    	if rand() > mutateRate
             point1 = randomIndex(a)
-            point2 = randomIndex(a)
-            aux = a[point1]
-            a[point1] = a[point2]
-            a[point2] = aux
+            aux = a[i]
+            a[i] = a[point1]
+            a[point1] = aux
         end
     end
 
@@ -161,7 +184,7 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, ajust::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
+function solve(populationSize::Int, individualSize::Int, newIndividual::Function, ajust::Function, fitness::Function, shouldStop::Function, maxGeneration::Int, maximization::Bool)
     solver = GASolver(populationSize, individualSize, newIndividual, ajust, fitness, 0.2, 0.9, maximization)
     generateFirstPopulation!(solver)
 

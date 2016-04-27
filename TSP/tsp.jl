@@ -1,16 +1,15 @@
 push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
-using Plots
 
-pyplot()
+include("plotter.jl")
 
 const WORLD_SIZE = 1000
-const CITIES = 20
-const PROBLEMAN_SIZE = CITIES::Int64
-const POPULATION_SIZE = 200::Int64
-const MAX_GENERATION = 50000::Int64
-const EQUALS_GENERATIONS = 10000::Int64
+const CITIES = 15
+const PROBLEMAN_SIZE = CITIES::Int
+const POPULATION_SIZE = 200::Int
+const MAX_GENERATION = 50000::Int
+const EQUALS_GENERATIONS = 10000::Int
 
 type City
     lat::Float64
@@ -35,9 +34,7 @@ function imprimeSolucao(solucao)
     xs[end] = city.lat
     println(xs)
     println(ys)
-    plot(xs, ys)
-    scatter!(xs, ys,markersize=6,c=:orange)
-    png("tsp")
+    draw(xs, ys, "tsp.png")
 end
 
 function ehViavel(solucao)
@@ -46,6 +43,7 @@ end
 
 function distance(c1::City, c2::City)
     d = sqrt((c1.lat - c2.lat) ^ 2 + (c1.long - c2.long) ^ 2)
+
     return d == 0 ? error("This was not supposed to happen") : d
 end
 
@@ -58,7 +56,12 @@ function fitness(solucao)
         if i < length(solucao)
             city2 = cities[round(Int, solucao[i + 1])]
         end
-        d += distance(city1, city2)
+        try
+	        d += distance(city1, city2)
+	    catch
+	        println(solucao)
+	        error("This is wrong!")
+	    end
     end
 
     return d
@@ -83,22 +86,22 @@ function shouldStop(m)
 end
 
 function ajust(route)
-    ajusted = Array{Float64}(length(route))
-    allCities = collect(1:length(route))
-    notVisitedCities = setdiff(allCities, route)
-    visitedCities = []
+    #ajusted = Array{Float64}(length(route))
+    #allCities = collect(1:length(route))
+    #notVisitedCities = setdiff(allCities, route)
+    #visitedCities = []
 
-    for i = 1:length(route)
-        city = route[i]
-        if findfirst(visitedCities, city) != 0
-            city = splice!(notVisitedCities, 1)
-        end
-        append!(visitedCities, [city])
+    #for i = 1:length(route)
+    #    city = route[i]
+    #    if findfirst(visitedCities, city) != 0
+    #        city = splice!(notVisitedCities, 1)
+    #    end
+    #    append!(visitedCities, [city])
 
-        ajusted[i] = city
-    end
+    #    ajusted[i] = city
+    #end
 
-    return ajusted
+    return route
 end
 
 solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, ajust, fitness, shouldStop, MAX_GENERATION, false)
