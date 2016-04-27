@@ -4,11 +4,11 @@ using GeneticAlgorithmSolver: GASolver, solve
 
 include("plotter.jl")
 
-const WORLD_SIZE = 1000
-const CITIES = 15
+const WORLD_SIZE = 200
+const CITIES = 20
 const PROBLEMAN_SIZE = CITIES::Int
 const POPULATION_SIZE = 200::Int
-const MAX_GENERATION = 50000::Int
+const MAX_GENERATION = 1000::Int
 const EQUALS_GENERATIONS = 10000::Int
 
 type City
@@ -16,10 +16,12 @@ type City
     long::Float64
 end
 
-cities = Array{City}(CITIES)
-for i = 1:CITIES
-    cities[i] = City(rand() * WORLD_SIZE, rand() * WORLD_SIZE)
-end
+#cities = Array{City}(CITIES)
+#for i = 1:CITIES
+#    cities[i] = City(rand() * WORLD_SIZE, rand() * WORLD_SIZE)
+#end
+cities = [City(60, 200) City(180, 200) City(80, 180) City(140, 180) City(20, 160) City(100, 160) City(200, 160) City(140, 140) City(40, 120) City(100, 120) City(180, 100) City(60, 80) City(120, 80) City(180, 60) City(20, 40) City(100, 40) City(200, 40) City(20, 20) City(60, 20) City(160, 20)]
+println(cities)
 
 function imprimeSolucao(solucao)
     xs = Array{Float64}(length(solucao) + 1)
@@ -50,21 +52,18 @@ end
 function fitness(solucao)
     d = 0
 
-    for i in eachindex(solucao)
+    for i = 1:length(solucao)
         city1 = cities[round(Int, solucao[i])]
-        city2 = cities[round(Int, solucao[1])]
-        if i < length(solucao)
+        if i == length(solucao)
+        	city2 = cities[round(Int, solucao[1])]
+        else
             city2 = cities[round(Int, solucao[i + 1])]
         end
-        try
-	        d += distance(city1, city2)
-	    catch
-	        println(solucao)
-	        error("This is wrong!")
-	    end
+
+        d += distance(city1, city2)
     end
 
-    return d
+    return 1/d
 end
 
 function newIndividual()
@@ -108,6 +107,7 @@ solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, ajust, fitness, s
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])
+println(1/fitness(solved[1]))
 println(fitness(solved[1]))
 println(ehViavel(solved[1]))
 

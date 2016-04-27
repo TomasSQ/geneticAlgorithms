@@ -52,31 +52,40 @@ function generateNewPopulation!(solver::GASolver)
     population[1, :] = solver.population[getFitnessest(solver).index, :]
 
     for i = 2:solver.populationSize
-        if rand() > solver.reproduceRate
+#        if rand() > solver.reproduceRate
             parent1 = tournament(solver)
             parent2 = tournament(solver)
 
 			child = crossover(parent1, parent2, solver.mutateRate)
             population[i, :] = solver.ajust(child)
-        else
-            population[i, :] = solver.newIndividual()
-        end
+#        else
+#            population[i, :] = solver.newIndividual()
+#        end
     end
 
     solver.population = population
 end
 
 function tournament(solver::GASolver)
-    values = getValues(solver)
-    randValue = rand() * sum(values)::Float64
-    sumFitness = 0.0
-    for i = 1:solver.populationSize
-        sumFitness += values[i]
+    #values = getValues(solver)
+    #randRoute = rand() * sum(values)::Float64
+    #sumFitness = 0.0
+    #for i = 1:solver.populationSize
+    #    sumFitness += values[i]
 
-        if randValue <= sumFitness
-            return solver.population[i, :]
-        end
+    #    if randValue <= sumFitness
+    #        return solver.population[i, :]
+    #    end
+    #end
+    bestI = randomIndex(solver.ranking)
+    bestFitness = solver.ranking[bestI].fitness
+    for i = 1:min(5, solver.populationSize)
+    	randI = randomIndex(solver.ranking)
+    	if solver.ranking[randI].fitness > bestFitness
+    		bestI = randI
+    	end
     end
+    return solver.population[bestI, :]
 end
 
 function randomIndex(a::AbstractArray)
@@ -129,15 +138,15 @@ function rank!(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    #normalize!(solver)
+    normalize!(solver)
 end
 
 function normalize!(solver::GASolver)
-    sorted = sort(solver.ranking, by = (x) -> x.fitness, rev=!solver.maximization)
+    sorted = sort(solver.ranking, by = (x) -> x.fitness, rev=true)
 
     values = getValues(solver)
-    min = solver.maximization ? minimum(values) : maximum(values)
-    max = solver.maximization ? maximum(values) : minimum(values)
+    min = minimum(values)
+    max = maximum(values)
     factor = (max - min) / (solver.populationSize - 1)
 
     for i = 1:solver.populationSize
@@ -146,22 +155,16 @@ function normalize!(solver::GASolver)
 end
 
 function getFitnessest(solver::GASolver)
-    max = -Inf
-    maxI = 0
     min = Inf
     minI = 0
     for i = 1:solver.populationSize
-        if solver.ranking[i].fitness > max
-            max = solver.ranking[i].fitness
-            maxI = solver.ranking[i].index
-        end
         if solver.ranking[i].fitness < min
             min  = solver.ranking[i].fitness
             minI = solver.ranking[i].index
         end
     end
 
-    return solver.maximization ? Ranking(max, maxI) : Ranking(min, minI)
+    return Ranking(min, minI)
 end
 
 function getValues(solver::GASolver)
