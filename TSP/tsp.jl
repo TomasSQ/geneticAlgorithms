@@ -6,10 +6,10 @@ using Plots
 pyplot()
 
 const WORLD_SIZE = 1000
-const CITIES = 20
+const CITIES = 30
 const PROBLEMAN_SIZE = CITIES::Int64
 const POPULATION_SIZE = 200::Int64
-const MAX_GENERATION = 50000::Int64
+const MAX_GENERATION = 100000::Int64
 const EQUALS_GENERATIONS = 10000::Int64
 
 type City
@@ -21,6 +21,7 @@ cities = Array{City}(CITIES)
 for i = 1:CITIES
     cities[i] = City(rand() * WORLD_SIZE, rand() * WORLD_SIZE)
 end
+#cities = [City(60, 200);City(180, 200);City(80, 180);City(140, 180);City(20, 160);City(100, 160);City(200, 160);City(140, 140);City(40, 120);City(100, 120);City(180, 100);City(60, 80);City(120, 80);City(180, 60);City(20, 40);City(100, 40);City(200, 40);City(20, 20);City(60, 20);City(160, 20);]
 
 function imprimeSolucao(solucao)
     xs = Array{Float64}(length(solucao) + 1)
@@ -72,9 +73,9 @@ metrics = []
 
 function shouldStop(m)
     if length(metrics) != EQUALS_GENERATIONS
-        push!(metrics, m[1])
+        push!(metrics, round(Int, m[1]))
     else
-        metrics[indmax(metrics)] = m[1]
+        metrics[indmax(metrics)] = round(m[1])
         if round(Int, mean(metrics)) == round(Int, m[1])
             return true
         end
@@ -82,26 +83,8 @@ function shouldStop(m)
     return false
 end
 
-function ajust(route)
-    ajusted = Array{Float64}(length(route))
-    allCities = collect(1:length(route))
-    notVisitedCities = setdiff(allCities, route)
-    visitedCities = []
-
-    for i = 1:length(route)
-        city = route[i]
-        if findfirst(visitedCities, city) != 0
-            city = splice!(notVisitedCities, 1)
-        end
-        append!(visitedCities, [city])
-
-        ajusted[i] = city
-    end
-
-    return ajusted
-end
-
-solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, ajust, fitness, shouldStop, MAX_GENERATION, false)
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION,
+    singleCrossover=false, canRepetedGene=false)
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])

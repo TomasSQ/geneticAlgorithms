@@ -19,10 +19,13 @@ type GASolver
     population::AbstractArray{Float64,2}
     ranking::AbstractArray{Ranking}
     solution::AbstractVector{Float64}
-    generation::Int64
-    maximization::Bool
+    generation::Int
+    singleCrossover::Bool
+    mutateSwap::Bool
+    newGene::Function
+    canRepetedGene::Bool
 
-    GASolver(populationSize, individualSize, newIndividual, ajust, fitness, mutateRate, reproduceRate, maximization) = new(
+    GASolver(populationSize, individualSize, newIndividual, ajust, fitness, mutateRate, reproduceRate, singleCrossover, mutateSwap, newGene, canRepetedGene) = new(
         populationSize,
         individualSize,
         newIndividual,
@@ -34,7 +37,10 @@ type GASolver
         Array{Ranking}(populationSize),
         Array{Float64}(individualSize),
         0,
-        maximization
+        singleCrossover,
+        mutateSwap,
+        newGene,
+        canRepetedGene
     )
 end
 
@@ -52,11 +58,11 @@ function generateNewPopulation!(solver::GASolver)
     population[1, :] = solver.population[getFitnessest(solver).index, :]
 
     for i = 2:solver.populationSize
-        if rand() > solver.reproduceRate
+        if rand() < solver.reproduceRate
             firstIndividual = tournament(solver)
             secondIndividual = tournament(solver)
 
-            population[i, :] = solver.ajust(crossover(firstIndividual, secondIndividual, solver.mutateRate))
+            population[i, :] = solver.ajust(crossover(firstIndividual, secondIndividual, solver.mutateRate, solver))
         else
             population[i, :] = solver.newIndividual()
         end
@@ -82,19 +88,88 @@ function randomIndex(a::AbstractArray)
     return round(Int, rand() * (length(a) - 1) + 1)
 end
 
-function crossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64)
+function singleCrossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64, solver::GASolver)
+    child = Array{Float64}(length(a))
     point = randomIndex(a)
-    return mutate([sub(a, 1:point); sub(b, (point + 1):length(b))], mutateRate)
+    if solver.canRepetedGene
+        child = [sub(a, 1:point); sub(b, (point + 1):length(b))]
+    else
+        for i = 1:point
+            child[i] = a[i]
+        end
+        added = point
+        for i = (point + 1):length(b)
+            if findfirst(child, b[i]) == 0
+                child[i] = b[i]
+                added += 1
+            end
+        end
+        if added != length(a)
+            for i = 1:length(b)
+                if findfirst(child, b[i]) == 0
+                    child[i] = b[i]
+                    added += 1
+                end
+            end
+        end
+        if added != length(a)
+            error("Something went wrong")
+        end
+    end
+
+    return child
 end
 
-function mutate(a::AbstractArray, mutateRate)
-    if rand() > mutateRate
+function doubleCrossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64, solver::GASolver)
+    child = Array{Float64}(length(a))
+    point1 = randomIndex(a)
+    point2 = randomIndex(a)
+    startI = min(point1, point2)
+    endI = max(point1, point2)
+    for i = startI:endI
+        child[i] = a[i]
+    end
+    for j = 1:length(b)
+        if j < startI || j > endI
+            if solver.canRepetedGene
+                child[j] = b[j]
+            else
+                for i = 1:length(b)
+
+                    if findfirst(child, b[i]) == 0
+                        child[j] = b[i]
+                    end
+                end
+            end
+        end
+    end
+
+    return child
+end
+
+function crossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64, solver::GASolver)
+    child = Array{Float64}(length(a))
+    if solver.singleCrossover
+        child = singleCrossover(a, b, mutateRate, solver)
+    else
+        child = doubleCrossover(a, b, mutateRate, solver)
+    end
+
+    return mutate(child, mutateRate, solver)
+end
+
+function mutate(a::AbstractArray, mutateRate, solver::GASolver)
+    if rand() < mutateRate
         for i = 1:randomIndex(a)
-            point1 = randomIndex(a)
-            point2 = randomIndex(a)
-            aux = a[point1]
-            a[point1] = a[point2]
-            a[point2] = aux
+            if solver.mutateSwap
+                point1 = randomIndex(a)
+                point2 = randomIndex(a)
+                aux = a[point1]
+                a[point1] = a[point2]
+                a[point2] = aux
+            else
+                a[i] = solver.newGene()
+            end
         end
     end
 
@@ -106,39 +181,33 @@ function rank!(solver::GASolver)
         solver.ranking[i] = Ranking(solver.fitness(solver.population[i, :]), i)
     end
 
-    #normalize!(solver)
+    normalize!(solver)
 end
 
 function normalize!(solver::GASolver)
-    sorted = sort(solver.ranking, by = (x) -> x.fitness, rev=!solver.maximization)
+    sorted = sort(solver.ranking, by = (x) -> x.fitness, rev=true)
 
     values = getValues(solver)
-    min = solver.maximization ? minimum(values) : maximum(values)
-    max = solver.maximization ? maximum(values) : minimum(values)
-    factor = (max - min) / (solver.populationSize - 1)
+    worstFit = maximum(values)
+    bestFit = minimum(values)
+    factor = (bestFit - worstFit) / (solver.populationSize - 1)
 
     for i = 1:solver.populationSize
-        solver.ranking[i] = Ranking(min + factor * (i - 1), sorted[i].index)
+        solver.ranking[i] = Ranking(worstFit + factor * (i - 1), sorted[i].index)
     end
 end
 
 function getFitnessest(solver::GASolver)
-    max = -Inf
-    maxI = 0
     min = Inf
     minI = 0
     for i = 1:solver.populationSize
-        if solver.ranking[i].fitness > max
-            max = solver.ranking[i].fitness
-            maxI = solver.ranking[i].index
-        end
         if solver.ranking[i].fitness < min
             min  = solver.ranking[i].fitness
             minI = solver.ranking[i].index
         end
     end
 
-    return solver.maximization ? Ranking(max, maxI) : Ranking(min, minI)
+    return Ranking(min, minI)
 end
 
 function getValues(solver::GASolver)
@@ -161,8 +230,12 @@ function metrics(solver::GASolver)
     return metrics
 end
 
-function solve(populationSize::Int64, individualSize::Int64, newIndividual::Function, ajust::Function, fitness::Function, shouldStop::Function, maxGeneration::Int64, maximization::Bool)
-    solver = GASolver(populationSize, individualSize, newIndividual, ajust, fitness, 0.2, 0.9, maximization)
+function solve(populationSize::Int, individualSize::Int,
+        newIndividual::Function, fitness::Function, shouldStop::Function,
+        maxGeneration::Int, mutateRate::Float64=0.05, reproduceRate::Float64=0.95
+        ;ajust::Function=(x) -> x, singleCrossover::Bool=true, mutateSwap::Bool=true, newGene::Function=()->1, canRepetedGene::Bool=true)
+    solver = GASolver(populationSize, individualSize, newIndividual, ajust, fitness, mutateRate, reproduceRate,
+        singleCrossover, mutateSwap, newGene, canRepetedGene)
     generateFirstPopulation!(solver)
 
     while solver.generation != maxGeneration
