@@ -7,35 +7,28 @@ const POPULATION_SIZE = 100
 const MAX_GENERATION = 10000
 const EQUALS_GENERATIONS = 200000
 const PENALITY = 1
-const GET_BACK_PENALITY = 1
+const GET_BACK_PENALITY = 0.5
 const FAR_PENALITY = 10
 const UP = 1
 const DOWN = 2
 const LEFT = 3
 const RIGHT = 4
 const MAZE = """
-###########F#########
-#     #       #     #
-### ### ### ### ### #
-#   #   # #     #   #
-# ### ### ####### # #
-# #   #         # # #
-# # ##### ##### # ###
-# # #     #   # #   #
-# # # ##### # # ### #
-#   #   # # #   #   #
-# ##### # # ##### ###
-#       # #     #   #
-######### ##### #####
-#         #     #   #
-# ####### # ####### #
-# #       #         #
-# ##### ########### #
-# #   #   #         #
-# # # ##### #########
-#   #               #
-###########S#########"""
-solucao = [UP, UP, UP, LEFT, LEFT, UP, UP, LEFT, LEFT, UP, UP, UP, UP, RIGHT, RIGHT, RIGHT, RIGHT, UP]
+#######F#######
+#           # #
+######### # # #
+#       # #   #
+# ##### # #####
+#     #   #   #
+# ### ##### # #
+#   #     # # #
+### ##### # ###
+# #     # # # #
+# ##### # # # #
+# #   # #   # #
+# # # # ##### #
+#   #         #
+#######S#######"""
 
 type Point
     wall::Bool
