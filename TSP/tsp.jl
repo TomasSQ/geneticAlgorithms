@@ -7,7 +7,7 @@ include("plotter.jl")
 const WORLD_SIZE = 1000
 const CITIES = 20
 const PROBLEMAN_SIZE = CITIES::Int
-const POPULATION_SIZE = 50::Int
+const POPULATION_SIZE = 100::Int
 const MAX_GENERATION = 100000::Int
 const EQUALS_GENERATIONS = 5000::Int
 
