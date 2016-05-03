@@ -63,7 +63,7 @@ function shouldStop(metrics)
     return metrics[1] == 0
 end
 
-solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION)
+solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION, canRepetedGene=false)
 println("Solução encontrada na geração ", solved[2])
 println(solved[1])
 imprimeSolucao(solved[1])

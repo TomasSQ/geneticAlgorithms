@@ -103,25 +103,33 @@ function singleCrossover(a::AbstractArray, b::AbstractArray, mutateRate::Float64
     if solver.canRepetedGene
         child = [sub(a, 1:point); sub(b, (point + 1):length(b))]
     else
+        offstring = sub(a, 1:point)
         for i = 1:point
             child[i] = a[i]
         end
         added = point
         for i = (point + 1):length(b)
-            if findfirst(child, b[i]) == 0
-                child[i] = b[i]
+            if findfirst(offstring, b[i]) == 0
                 added += 1
+                child[added] = b[i]
             end
         end
         if added != length(a)
-            for i = 1:length(b)
-                if findfirst(child, b[i]) == 0
-                    child[i] = b[i]
+            for i = 1:point
+                if findfirst(offstring, b[i]) == 0
                     added += 1
+                    child[added] = b[i]
+                end
+                if added == length(a)
+                    break
                 end
             end
         end
         if added != length(a)
+            println(a)
+            println(b)
+            println(child)
+            println(length(a), " but was ", added, " ", point)
             error("Something went wrong")
         end
     end
