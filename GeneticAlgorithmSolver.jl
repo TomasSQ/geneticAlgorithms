@@ -82,6 +82,15 @@ function tournament(solver::GASolver)
             return solver.population[i, :]
         end
     end
+    #bestI = randomIndex(solver.ranking)
+    #bestFitness = solver.ranking[bestI].fitness
+    #for i = 1:min(5, solver.populationSize)
+    #	randI = randomIndex(solver.ranking)
+    #    if solver.ranking[randI].fitness > bestFitness
+    #		bestI = randI
+    #	end
+    #end
+    #return solver.population[bestI, :]
 end
 
 function randomIndex(a::AbstractArray)
