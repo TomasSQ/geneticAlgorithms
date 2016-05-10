@@ -269,12 +269,11 @@ function solve(populationSize::Int, individualSize::Int,
         if solver.generation % 10 == 0 && DEBUG
             println("Geração: ", solver.generation, " min ", m[1], " max ", m[2], " avg ", m[3])
         end
-        generateNewPopulation!(solver)
+        if solver.generation != maxGeneration
+            generateNewPopulation!(solver)
+        end
     end
 
-    println(getFitnessest(solver).fitness)
-    println(getFitnessest(solver).index)
-    println(solver.fitness(solver.population[getFitnessest(solver).index, :]))
     solver.solution = collect(solver.population[getFitnessest(solver).index, :])
     return (solver.solution, solver.generation)
 end
