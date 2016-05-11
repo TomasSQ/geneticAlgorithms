@@ -2,9 +2,9 @@ push!(LOAD_PATH, string(pwd(), "/.."))
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const INDIVIDUAL_SIZE = 150
-const KNAPSACK_CAPACITY = 500
-const POPULATION_SIZE = 10
+const INDIVIDUAL_SIZE = 80
+const KNAPSACK_CAPACITY = 300
+const POPULATION_SIZE = 50
 const MAX_GENERATION = 100000
 const EQUALS_GENERATIONS = 10000
 
@@ -25,23 +25,6 @@ for i in eachindex(itens)
     valuesSum += itens[i].value
 end
 
-associations = Array{Float64, 2}(INDIVIDUAL_SIZE, INDIVIDUAL_SIZE)
-maxBenefit = 0.0
-for i in 1:INDIVIDUAL_SIZE
-    for j in 1:INDIVIDUAL_SIZE
-        if i != j && rand() < 0.5
-            associations[i, j] = 5.0 - rand() * 10.0
-            if associations[i, j] > maxBenefit
-                maxBenefit = associations[i, j]
-            end
-        else
-            associations[i, j] = 0.0::Float64
-        end
-    end
-end
-
-valuesSum += maxBenefit * INDIVIDUAL_SIZE
-
 function fitness(solucao)
     weight = 0.0::Float64
     value = valuesSum::Float64
@@ -51,14 +34,6 @@ function fitness(solucao)
             weight += itens[i].weight
             value -= itens[i].value
             push!(used, i)
-        end
-    end
-
-    for i in eachindex(used)
-        for j in eachindex(used)
-            if i != j
-                value += associations[i, j]
-            end
         end
     end
 
