@@ -62,9 +62,9 @@
 
 \section{Introdução}
 
-Em Teoria dos grafos, coloração de vértices de um dado grafo o problema de atribuir uma cor para cada vértice de forma que vértices vizinhos sempre tenham cores diferentes. O problema aqui tratado é a coloração de vértices mínima, ou seja, descobrir o número mínimo de cores que satisfaça a restrição citada. Este problema é NP-Completo.
+Em Teoria dos grafos, coloração de vértices de um dado grafo é o problema de atribuir uma cor para cada vértice de forma que vértices vizinhos sempre tenham cores diferentes. O problema aqui tratado é a coloração de vértices mínima, ou seja, descobrir o número mínimo de cores que satisfaça a restrição citada. Este problema é NP-Completo.
 
-Uma das naturezas do problema que o leva parecer NP-Completo é o número exponencial de combinações possíveis de cores (mesmo que erradas) que os vértices podem assumir, e poucos indícios de se a coloração testada será correta até que seja colorido um número "grande" de vértices se o grafo for "grande", sendo inviável testar todas. Dado este cenário, utilizar algoritmo genético (GA) irá reduzir o número de colorações testadas, e tornar tratável o problema.
+Uma das naturezas do problema que o leva parecer NP-Completo é o número exponencial de combinações possíveis de cores (mesmo que erradas) que os vértices podem assumir, e poucos indícios de se a coloração testada será correta até que seja colorido um número ``grande'' de vértices se o grafo for "grande", sendo inviável testar todas. Dado este cenário, utilizar algoritmo genético (GA) irá reduzir o número de colorações testadas, e tornar tratável o problema.
 
 Existem diversas formas de implementar soluções de GA, algumas mais verbosas do que outras, e a linguagem de programação Julia é próxima de modelos matemáticos, fácil de se aprender e programar, além de rápida como linguagens mais tradicionais como Java e C.
 
@@ -83,8 +83,8 @@ Para ser alcançado os resultados desejados foram executados os seguintes passos:
  \item Implementou-se um solocionador básico de problemas genéricos com algoritmo genético
  \item Resolveu-se o problema N-Rainhas com ele, com ajuda dos slides apresentados em sala de aula, adaptando o solucionador
  \item Resolveu-se o problema do caxeiro viajante, adaptando o solucionador
- \item Resolveu-se o problema de encontrar um caminho que resolva um labirinto, adaptando o solucionador
- \item Resolveu-se o problema da mochila, aqui já é para o solucionador estar pronto para qualquer problema
+ \item Resolveu-se o problema de encontrar um caminho que resolva um labirinto, realizando as adaptações finais ao solucionador
+ \item Resolveu-se o problema da mochila, um problema NP simples
  \item Resolveu-se o problema de coloração de vértices.
 \end{enumerate}
 
@@ -98,19 +98,13 @@ Nesta seção você deve apresentar claramente os resultados obtidos para os testes
 
 \section{Conclusões}
 
-Utilizar algoritmos genéticos se mostrou ser uma forma eficiente e rápida para encontrar soluções de problemas NP-Difíceis.
-
-Nesta seção, faça uma análise geral de seu trabalho, levando em conta todo o processo de desenvolvimento e os resultados. Quais os seus pontos fortes? Quais os seus pontos fracos? Quais aspectos de sua metodologia de trabalho foram positivas? Quais foram negativas? O que você recomendaria (ou não recomendaria) a outras pessoas que estejam realizando trabalhos similares aos seus? 
-
+Utilizar algoritmos genéticos se mostrou ser uma forma eficiente para encontrar soluções de problemas NP-Difíceis, e rápida implementação, dado que o solucionador já esteja pronto (como já está, para todos que encontrarem o repositório).
 
 %******************************************************************************
 % Referências - Definidas no arquivo Relatorio.bib
- +-------------+
 
 \bibliographystyle{IEEEtran}
 
 \bibliography{Relatorio}
-
-%******************************************************************************
 
 \end{document}

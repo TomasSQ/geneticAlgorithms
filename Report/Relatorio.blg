@@ -2,7 +2,6 @@ This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: Relatorio.aux
 The style file: IEEEtran.bst
-I found no \citation commands---while reading file Relatorio.aux
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
@@ -14,45 +13,44 @@ Database file #1: Relatorio.bib
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
 
 Done.
-You've used 0 entries,
+You've used 3 entries,
             4039 wiz_defined-function locations,
-            809 strings with 7217 characters,
-and the built_in function-call counts, 103 in all, are:
-= -- 0
-> -- 0
-< -- 0
-+ -- 0
-- -- 0
-* -- 19
-:= -- 26
-add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
-chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 1
-format.name$ -- 0
-if$ -- 3
+            836 strings with 7706 characters,
+and the built_in function-call counts, 2357 in all, are:
+= -- 179
+> -- 41
+< -- 23
++ -- 22
+- -- 5
+* -- 124
+:= -- 356
+add.period$ -- 7
+call.type$ -- 3
+change.case$ -- 3
+chr.to.int$ -- 57
+cite$ -- 3
+duplicate$ -- 167
+empty$ -- 200
+format.name$ -- 7
+if$ -- 531
 int.to.chr$ -- 0
-int.to.str$ -- 0
-missing$ -- 0
-newline$ -- 23
-num.names$ -- 0
-pop$ -- 0
+int.to.str$ -- 3
+missing$ -- 25
+newline$ -- 32
+num.names$ -- 3
+pop$ -- 60
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 2
-skip$ -- 1
+skip$ -- 173
 stack$ -- 0
-substring$ -- 0
-swap$ -- 0
-text.length$ -- 0
+substring$ -- 121
+swap$ -- 131
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 5
-type$ -- 0
+type$ -- 3
 warning$ -- 0
-while$ -- 0
-width$ -- 0
-write$ -- 22
-(There was 1 error message)
+while$ -- 12
+width$ -- 4
+write$ -- 50
