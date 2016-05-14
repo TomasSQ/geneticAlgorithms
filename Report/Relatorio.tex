@@ -1,0 +1,116 @@
+%% Adaptado de 
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% Traduzido para o congresso de IC da USP
+%%*****************************************************************************
+% Não modificar
+
+\documentclass[twoside,conference,a4paper]{IEEEtran}
+
+%******************************************************************************
+% Não modificar
+\usepackage{IEEEtsup} % Definições complementares e modificações.
+\usepackage[latin1]{inputenc} % Disponibiliza acentos.
+\usepackage[english,brazilian]{babel}
+%% Disponibiliza Inglês e Português do Brasil.
+\usepackage{latexsym,amsfonts,amssymb} % Disponibiliza fontes adicionais.
+\usepackage{theorem} 
+\usepackage[cmex10]{amsmath} % Pacote matemático básico 
+\usepackage{url} 
+%\usepackage[portuges,brazil,english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+\usepackage[tight,footnotesize]{subfigure} 
+\usepackage[noadjust]{cite} % Disponibiliza melhorias em citações.
+%%*****************************************************************************
+
+\begin{document}
+\selectlanguage{brazilian}
+\renewcommand{\IEEEkeywordsname}{Palavras-chave}
+
+%%*****************************************************************************
+
+\urlstyle{tt}
+% Indicar o nome do autor e o curso/nível (grad-mestrado-doutorado-especial)
+\title{Resolução de Coloração de Vértices com GA}
+\author{%
+ \IEEEauthorblockN{Tomás Silva Queiroga\,\IEEEauthorrefmark{1}}
+ \IEEEauthorblockA{\IEEEauthorrefmark{1}%
+                   Ciência da Computação - Graduação \\
+                   E-mail: tomasqueiroga@gmail.com}
+}
+
+%%*****************************************************************************
+
+\maketitle
+
+%%*****************************************************************************
+% Resumo do trabalho
+\begin{abstract}
+ O resumo deve conter uma breve descrição sobre várias partes do seu trabalho que serão tratadas no decorrer do texto. Primeiramente, pode-se descrever brevemente o problema no qual você está trabalhando: Por que você está desenvolvendo este trabalho? Qual a motivação para este desenvolvimento? Por que ele é importante? O resumo deve conter também um breve descritivo da metodologia que você usou no desenvolvimento: Que problema foi tratado? Como a solução foi construída/desenvolvida? Quais as tecnologias utilizadas? Finalmente, deve falar um pouco sobre os resultados que você conseguiu: o resultado final ficou bom? Quais os seus principais diferenciais? Qual a eficiência do desenvolvimento?
+\end{abstract}
+
+% Indique três palavras-chave que descrevem o trabalho
+\begin{IEEEkeywords}
+ Teoria de grafos, coloração de vértices, problema NP-Completo, inteligência artificial, algoritmo genético, Julia
+\end{IEEEkeywords}
+
+%%*****************************************************************************
+% Modifique as seções de acordo com o seu projeto
+
+\section{Introdução}
+
+Em Teoria dos grafos, coloração de vértices de um dado grafo o problema de atribuir uma cor para cada vértice de forma que vértices vizinhos sempre tenham cores diferentes. O problema aqui tratado é a coloração de vértices mínima, ou seja, descobrir o número mínimo de cores que satisfaça a restrição citada. Este problema é NP-Completo.
+
+Uma das naturezas do problema que o leva parecer NP-Completo é o número exponencial de combinações possíveis de cores (mesmo que erradas) que os vértices podem assumir, e poucos indícios de se a coloração testada será correta até que seja colorido um número "grande" de vértices se o grafo for "grande", sendo inviável testar todas. Dado este cenário, utilizar algoritmo genético (GA) irá reduzir o número de colorações testadas, e tornar tratável o problema.
+
+Existem diversas formas de implementar soluções de GA, algumas mais verbosas do que outras, e a linguagem de programação Julia é próxima de modelos matemáticos, fácil de se aprender e programar, além de rápida como linguagens mais tradicionais como Java e C.
+
+No final da introdução, é comum inserir um parágrafo descrevendo o que será encontrado em cada seção no restante do seu texto. Exemplo: Este trabalho encontra-se organizado da seguinte forma: a seção 2 apresenta X. A seção 3 descreve Y. Os resultados são apresentados na seção 4, e as conclusões são apresentadas na seção 5.
+
+\section{Trabalho Proposto}
+
+O presente trabalho se propõe a implementar em Julia um solucionador de problemas genéricos utilizando algoritmos genéticos e resolver o problema de coloração de vértices.
+
+\section{Métodos}
+
+Para ser alcançado os resultados desejados foram executados os seguintes passos:
+\begin{enumerate}
+ \item Estudou-se a linguagem de programação Julia
+ \item Criou-se um repositório online para guardar o código utilizado, bem como este relatório
+ \item Implementou-se um solocionador básico de problemas genéricos com algoritmo genético
+ \item Resolveu-se o problema N-Rainhas com ele, com ajuda dos slides apresentados em sala de aula, adaptando o solucionador
+ \item Resolveu-se o problema do caxeiro viajante, adaptando o solucionador
+ \item Resolveu-se o problema de encontrar um caminho que resolva um labirinto, adaptando o solucionador
+ \item Resolveu-se o problema da mochila, aqui já é para o solucionador estar pronto para qualquer problema
+ \item Resolveu-se o problema de coloração de vértices.
+\end{enumerate}
+
+Foram feitos diversos passos antes de se resolver o problema principal porque tratar problemas NP-Difíceis não é uma tarefa fácil. E quis-se ter certeza de que, caso falha-se solucionar o problema com GA (o que não ocorreu) era interessante saber se o problema estava na formulação do problema como GA, ou no solucionador.
+
+Quando diz-se "resolveu-se", quer-se dizer que foram testadas algumas instâncias do problema, e que todas chegaram a resultados esperados.
+
+\section{Resultados e Discussão}
+
+Nesta seção você deve apresentar claramente os resultados obtidos para os testes efetuados. Procure organizar os dados utilizando uma linguagem científica. Algumas opções são o uso de tabelas e gráficos, para que a compreensão seja fácil e rápida. 
+
+\section{Conclusões}
+
+Utilizar algoritmos genéticos se mostrou ser uma forma eficiente e rápida para encontrar soluções de problemas NP-Difíceis.
+
+Nesta seção, faça uma análise geral de seu trabalho, levando em conta todo o processo de desenvolvimento e os resultados. Quais os seus pontos fortes? Quais os seus pontos fracos? Quais aspectos de sua metodologia de trabalho foram positivas? Quais foram negativas? O que você recomendaria (ou não recomendaria) a outras pessoas que estejam realizando trabalhos similares aos seus? 
+
+
+%******************************************************************************
+% Referências - Definidas no arquivo Relatorio.bib
+ +-------------+
+
+\bibliographystyle{IEEEtran}
+
+\bibliography{Relatorio}
+
+%******************************************************************************
+
+\end{document}
