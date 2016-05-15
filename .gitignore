@@ -1,2 +1,9 @@
 *~
 *.png
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.log
