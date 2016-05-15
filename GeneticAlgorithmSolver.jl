@@ -266,7 +266,7 @@ function solve(populationSize::Int, individualSize::Int,
             break
         end
 
-        if solver.generation % 10 == 0 && DEBUG
+        if solver.generation % 1000 == 0 && DEBUG
             println("Geração: ", solver.generation, " min ", m[1], " max ", m[2], " avg ", m[3])
         end
         if solver.generation != maxGeneration

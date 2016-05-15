@@ -1,16 +1,19 @@
 push!(LOAD_PATH, string(pwd(), "/.."))
 
-#using PyPlot
+using PyPlot
 
 using GeneticAlgorithmSolver: GASolver, solve
 
-const VERTEXS = 80
+const VERTEXS = 50
 const EDGES = VERTEXS * 4
 const PROBLEMAN_SIZE = VERTEXS::Int
-const POPULATION_SIZE = 200::Int
+const POPULATION_SIZE = 50::Int
 const MAX_GENERATION = 100000::Int
 const EQUALS_GENERATIONS = 5000::Int
 const MAX_COLOR = VERTEXS
+
+global metrics = []
+global allResults = []
 
 type Vertex
     id::Int
@@ -53,9 +56,10 @@ function petersenGraph()
         Vertex(10, -7, 1.5, [5, 7, 8], 0)]
 end
 
-graph = randomGraph()
+global graph = randomGraph()
+#graph = petersenGraph()
 
-maxVertexDegree = 0
+global maxVertexDegree = 0
 for v in graph
     if length(v.adjacents) > maxVertexDegree
         maxVertexDegree = length(v.adjacents)
@@ -107,7 +111,28 @@ function imprimeSolucao(solucao, shouldPlot=false)
         plotVertexs(colors)
 
         savefig("colored.png")
+        close()
     end
+end
+
+function imprimeReport(populationSize, mutateRate, mutateSwap, reproduceRate, singleCrossover)
+    colors = ["blue", "red", "green"]
+    labels = ["Best", "Worst", "Average"]
+    lines = []
+    xs = collect(1:size(allResults, 1))
+
+    for i = 1:3
+        ys = []
+        for m in allResults
+            push!(ys, m[i])
+        end
+        push!(lines, plot(xs, ys, c=colors[i], label=labels[i]))
+    end
+    legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
+    ylabel("Fitness")
+    xlabel("Geração")
+    savefig("report_p$populationSize-mr$mutateRate-ms$mutateSwap-rr$reproduceRate-sc$singleCrossover.png")
+    close()
 end
 
 function countColors(solucao)
@@ -145,9 +170,8 @@ function newIndividual()
     return ceil(rand(length(graph)) * MAX_COLOR)
 end
 
-metrics = []
-
 function shouldStop(m)
+    push!(allResults, m)
     if m[1] == 0
         return true
     end
@@ -162,9 +186,30 @@ function shouldStop(m)
     return false
 end
 
-function color!()
-    solved = solve(POPULATION_SIZE, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION)
+function color!(populationSize::Int, mutateRate::Float64=0.05, reproduceRate::Float64=0.95
+        ;singleCrossover::Bool=true, mutateSwap::Bool=true, newGene::Function=()->ceil(rand() * MAX_COLOR))
+    solved = solve(populationSize, PROBLEMAN_SIZE, newIndividual, fitness, shouldStop, MAX_GENERATION, mutateRate, reproduceRate, singleCrossover=singleCrossover, mutateSwap=mutateSwap, newGene=newGene)
     println("Solução encontrada na geração ", solved[2])
     imprimeSolucao(solved[1])
+    imprimeReport(populationSize, mutateRate, mutateSwap, reproduceRate, singleCrossover)
 end
-color!()
+
+color!(POPULATION_SIZE)
+allResults = []
+metrics = []
+color!(1000)
+allResults = []
+metrics = []
+color!(POPULATION_SIZE, 0.005)
+allResults = []
+metrics = []
+color!(POPULATION_SIZE, 0.5)
+allResults = []
+metrics = []
+color!(POPULATION_SIZE, 0.5, 0.5)
+allResults = []
+metrics = []
+color!(POPULATION_SIZE, 0.05, 0.90,singleCrossover=false)
+allResults = []
+metrics = []
+color!(POPULATION_SIZE, 0.05, 0.99,singleCrossover=false, mutateSwap=false)
